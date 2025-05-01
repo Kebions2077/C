@@ -10,11 +10,11 @@ void cal_norma(int vet1[3], int vet2[3], int *norma1, int *norma2);
 void cal_versor(int vet1[3]);
 
 int main(void) {
-    int vet1[3], vet2[3];
-    int op1, op2;
-    int r_soma[3], r_sub[3], escalar;
-    int r_escalar1[3], r_escalar2[3];
-    int norma1, norma2;
+    int vet1[3], vet2[3]; //Variaveis para os vetores 
+    int op1, op2; // inicializam o switch principal e o switch das operaçoes de vetor
+    int r_soma[3], r_sub[3], escalar; //resultados das operaçoes de vetor
+    int r_escalar1[3], r_escalar2[3]; //resultados do Produto escalar
+    int norma1, norma2; //saida das duas normas dos vetores
 
     printf("----------------------------Tabela De Estudos para um primeiro estudo de ALGA----------------------------\n");
     printf("1)Operações com Vetores: Soma, Subtração, Mult. Por Escalar\n");
@@ -25,7 +25,7 @@ int main(void) {
     printf("6)Produto Vetorial\n");
     printf("---------------------------------------------------------------------------------------------------------\n");
     printf("Digite Um Tópico:\n");
-    scanf("%i", &op1);
+    scanf("%i", &op1); //switch principal de operções
 
     switch(op1) {
         case 1:
@@ -35,12 +35,12 @@ int main(void) {
             printf("3) Multiplicação Por Escalar\n");
             printf("----------------------------------------------------------------------------\n");
             printf("Digite uma opção:");
-            scanf("%i", &op2);
+            scanf("%i", &op2);    //switch secundario para manipulações das operaçoes
 
             switch(op2) {
                 case 1:
                     printf("---Soma---\n");
-                    preenche_vet1(vet1);
+                    preenche_vet1(vet1);     //chamados das funçoes
                     preenche_vet2(vet2);
                     soma_vetor(vet1, vet2, r_soma);
                     break;
@@ -71,7 +71,7 @@ int main(void) {
             printf("Norma do vetor 1: %d\n", norma1);
             printf("Norma do vetor 2: %d\n", norma2);
             break;
-        // Adicione os outros casos aqui
+        
         default:
             printf("Opção inválida!\n");
             break;
@@ -80,7 +80,7 @@ int main(void) {
     return 0;
 }
 
-void preenche_vet1(int vet1[3]) {
+void preenche_vet1(int vet1[3]) { //usa um for para preencher o vetor 1
     for(int x = 0; x < 3; x++) {
         printf("Digite a posição %i do vetor 1: ", x);
         scanf("%i", &vet1[x]);
@@ -93,7 +93,7 @@ void preenche_vet1(int vet1[3]) {
     printf("\n");
 }
 
-void preenche_vet2(int vet2[3]) {
+void preenche_vet2(int vet2[3]) { //usa um for para preencher o vetor 2
     for(int x = 0; x < 3; x++) {
         printf("Digite a posição %i do vetor 2: ", x);
         scanf("%i", &vet2[x]);
@@ -106,7 +106,7 @@ void preenche_vet2(int vet2[3]) {
     printf("\n");
 }
 
-void soma_vetor(int vet1[3], int vet2[3], int r_soma[3]) {
+void soma_vetor(int vet1[3], int vet2[3], int r_soma[3]) { 
     r_soma[0] = vet1[0] + vet2[0];
     r_soma[1] = vet1[1] + vet2[1];
     r_soma[2] = vet1[2] + vet2[2];
