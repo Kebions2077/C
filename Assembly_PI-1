@@ -1,0 +1,30 @@
+
+Expressao_Assembly:
+    # Negação das entradas usando usando o operador logicoXORI
+    xori $t0, $a0, 1      # $t0 = !A
+    xori $t1, $a1, 1      # $t1 = !B
+    xori $t2, $a2, 1      # $t2 = !C
+
+    ##Primeira Parte: (!A*!B*!C)
+    and $t3, $t0, $t1     # !A AND !B
+    and $t3, $t3, $t2      # AND !C
+
+    ##Segunda Parte: (!A*B*!C)
+    and $t4, $t0, $a1     # !A AND B
+    and $t4, $t4, $t2      # AND !C
+
+    ## Terceira Parte 3: (A*!B*!C)
+    and $t5, $a0, $t1     # A AND !B
+    and $t5, $t5, $t2      # AND !C
+
+    ## Quarta Parte: (A*!B*C)
+    and $t6, $a0, $t1     # A AND !B
+    and $t6, $t6, $a2      # AND C
+
+    # Saida (!A*!B*!C)+(!A*B*!C)+(A*!B*!C)+(A*!B*C)
+
+     or $v0, $t3, $t4      # Termo1 OR Termo2
+    or $v0, $v0, $t5       # OR Termo3
+    or $v0, $v0, $t6       # OR Termo4
+
+    jr $ra                # Retorna resultado em $v0
