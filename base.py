@@ -1,56 +1,110 @@
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.datasets import load_wine
+import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.metrics import classification_report, confusion_matrix
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.regularizers import l2
 
-wine = load_wine()
-X, y = wine.data, wine.target
+# Carregar os dados
+glass = pd.read_csv("C:/dev/glass.csv")
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# Pré-processamento
+X = glass.drop('Type', axis=1)
+y = glass['Type']
 
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
+# Codificar labels
+le = LabelEncoder()
+y_encoded = le.fit_transform(y)
 
+# Normalizar features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Dividir em treino e teste
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded
+)
+
+# Construir a rede neural
+model = Sequential()
+model.add(Dense(128, activation='relu', input_shape=(X_train.shape[1],), kernel_regularizer=l2(0.01)))
+model.add(BatchNormalization())
+model.add(Dropout(0.5))
+
+model.add(Dense(256, activation='relu', kernel_regularizer=l2(0.01)))
+model.add(BatchNormalization())
+model.add(Dropout(0.5))
+
+model.add(Dense(128, activation='relu', kernel_regularizer=l2(0.01)))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+
+model.add(Dense(len(np.unique(y_encoded)), activation='softmax'))
+
+# Compilar o modelo
+optimizer = Adam(learning_rate=0.001)
+model.compile(
+    optimizer=optimizer,
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Callbacks
+early_stop = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=1e-6)
+
+# Treinar o modelo
+history = model.fit(
+    X_train, y_train,
+    epochs=200,
+    batch_size=64,
+    validation_split=0.1,
+    callbacks=[early_stop, reduce_lr],
+    verbose=1
+)
+
+# Avaliar o modelo
+test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
+print(f'\nTest accuracy: {test_acc:.4f}')
+
+# Previsões
 y_pred = model.predict(X_test)
+y_pred_classes = np.argmax(y_pred, axis=1)
 
-print("Relatório de Classificação:\n")
-print(classification_report(y_test, y_pred))
-print(f"Acurácia: {accuracy_score(y_test, y_pred):.2f}")
+# Métricas detalhadas
+print('\nClassification Report:')
+print(classification_report(y_test, y_pred_classes, target_names=le.classes_))
 
-plt.figure(figsize=(8, 6))
-cm = confusion_matrix(y_test, y_pred)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=wine.target_names)
-disp.plot(cmap='Blues')
-plt.title("Matriz de Confusão")
-plt.savefig('matriz_confusao.png', dpi=300, bbox_inches='tight')
+# Matriz de confusão
+plt.figure(figsize=(10,8))
+sns.heatmap(
+    confusion_matrix(y_test, y_pred_classes),
+    annot=True, fmt='d', cmap='Blues',
+    xticklabels=le.classes_, yticklabels=le.classes_
+)
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
 plt.show()
 
-plt.figure(figsize=(10, 6))
-importances = model.feature_importances_
-indices = importances.argsort()[::-1]
-plt.title("Importância das Características")
-plt.barh(range(X.shape[1]), importances[indices], align='center')
-plt.yticks(range(X.shape[1]), [wine.feature_names[i] for i in indices])
-plt.xlabel("Importância Relativa")
-plt.tight_layout()
-plt.savefig('importancia_features.png', dpi=300, bbox_inches='tight')
-plt.show()
-
-report = classification_report(y_test, y_pred, output_dict=True)
-metrics = ['precision', 'recall', 'f1-score']
-classes = wine.target_names
-
-plt.figure(figsize=(10, 6))
-for metric in metrics:
-    values = [report[class_][metric] for class_ in classes]
-    plt.plot(classes, values, marker='o', label=metric)
-
-plt.title("Métricas por Classe")
-plt.xlabel("Classe")
-plt.ylabel("Valor")
-plt.ylim(0, 1.1)
+# Gráfico de acurácia e loss
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Accuracy over epochs')
 plt.legend()
-plt.grid(True)
-plt.savefig('metricas_classes.png', dpi=300, bbox_inches='tight')
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Loss over epochs')
+plt.legend()
 plt.show()
