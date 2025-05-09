@@ -80,14 +80,15 @@ y_pred_classes = np.argmax(y_pred, axis=1)
 
 # Métricas detalhadas
 print('\nClassification Report:')
-print(classification_report(y_test, y_pred_classes, target_names=le.classes_))
+print(classification_report(y_test, y_pred_classes))
 
 # Matriz de confusão
 plt.figure(figsize=(10,8))
 sns.heatmap(
     confusion_matrix(y_test, y_pred_classes),
     annot=True, fmt='d', cmap='Blues',
-    xticklabels=le.classes_, yticklabels=le.classes_
+    xticklabels=[str(cls) for cls in le.classes_], 
+    yticklabels=[str(cls) for cls in le.classes_]
 )
 plt.title('Confusion Matrix')
 plt.xlabel('Predicted')
