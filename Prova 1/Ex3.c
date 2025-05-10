@@ -1,7 +1,7 @@
 #include <stdio.h>
     void preenche(int vet[10]);
-    int cal_maior (int maior);
-    int cal_soma( int soma);
+    int cal_maior (int vet[10]);
+    int cal_soma( int vet[10]);
     float cal_media( int soma);
 
         void preenche(int vet[10]){
@@ -45,7 +45,7 @@
                 printf("[%i],vet[x]");
             }
             
-            cal_soma=soma(soma);
+            cal_soma=soma(vet);
             
             printf("A soma de todos os valores do vetor %i", soma);
             
@@ -53,7 +53,7 @@
             
             printf("A media Dos elementos do vetor:%.2f", media);
 
-            cal_maior= maior(int maior);
+            cal_maior= maior(vet);
 
             printf("O maior numero armazenado no vetor é: %i", maior);
             
