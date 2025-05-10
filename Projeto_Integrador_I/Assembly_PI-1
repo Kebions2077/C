@@ -1,0 +1,417 @@
+.data
+
+A:  .asciiz"\n digite o valor binario para entrada A:"
+B:  .asciiz"\n digite o valor binario para entrada B:"
+C:  .asciiz"\n digite o valor binario para entrada C:"
+X:  .asciiz"\n valor invalido porfavor digite valores de entradas binarios apenas!"
+
+spaceLabel: .asciiz " "
+logicMultiSymbol: .asciiz " x "
+logicAddSymbol: .asciiz " + "
+breakLineLabel: .asciiz "\n"
+
+resTitle: .asciiz "Resultado =>\n"
+expressaoLabel: .asciiz "Expressao: (!A x !B x !C) + (!A x B x !C) + (A x !B x !C) + (A x !B x C)\n"
+entradasLabel: .asciiz "Entradas: "
+entradaALabel: .asciiz "A: "
+entradaBLabel: .asciiz "B: "
+entradaCLabel: .asciiz "C: "
+resMin1: .asciiz "Mintermo 0: (!A x !B x !C) => "
+resMin2: .asciiz "Mintermo 2: (!A x B x !C) => "
+resMin3: .asciiz "Mintermo 4: (A x !B x !C) => "
+resMin4: .asciiz "Mintermo 5: (A x !B x C) => "
+resMin: .asciiz " = "
+expressaoFinalLabel: .asciiz "Expressao final: "
+resFinal: .asciiz "O resultado final da expressao e: "
+.text
+
+#entrada a
+
+entradaA:#rotulo de verificação binaria para entrada a
+
+#entrada do valor para entrada a
+
+li $v0, 4
+la $a0, A
+syscall
+
+li $v0, 5
+Syscall 
+
+move $s0,$v0
+
+#carregando os valores binarios para testes de verificções se as entradas correspondem a 0 ou 1
+
+li $t1, 0
+li $t2, 1
+
+#aplicando as condiações binarios as labels para gerar um loop de verificação casso incorreto, ou prosseguir o programa caso correto
+
+beq $s0, $t1, binarioA
+beq $s0, $t2, binarioA     
+
+
+#informa erro e faz um jump direto para o inicio de A
+erroA:
+ 
+li $v0, 4
+la $a0, X
+syscall
+
+j entradaA
+
+binarioA:#caso o resultado seja satisfatorio a proposta do programa
+
+
+#entrada b
+
+
+#repete o mesmo processo para entrada B apenas não é mais necesario armezanr valores binairos nos resgritradores t1 e t2 visto que foi feito anteriormente
+entradaB:
+
+li $v0, 4
+la $a0, B
+syscall
+
+li $v0, 5
+Syscall 
+
+move $s1,$v0
+
+beq $s1, $t1, binarioB
+beq $s1, $t2, binarioB     
+
+erroB:
+ 
+li $v0, 4
+la $a0, X
+syscall
+
+j entradaB
+
+binarioB:
+
+
+#entrada c
+
+#repte o mesmo teste de verificação usado na entrada B apenas com apenas modificações nos nomes de rotulos
+entradaC:
+
+li $v0, 4
+la $a0, C
+syscall
+
+li $v0, 5
+Syscall 
+
+move $s2,$v0
+
+beq $s2, $t1, binarioC
+beq $s2, $t2, binarioC     
+
+erroC:
+ 
+li $v0, 4
+la $a0, X
+syscall
+
+j entradaC
+
+binarioC:
+
+#mintermo 0
+
+xori $t3,$s0,0000000000000001
+
+
+
+xori $t4,$s1,0000000000000001
+
+
+and $t5,$t3,$t4
+
+
+xori $t6,$s2,0000000000000001
+
+and $s3,$t5,$t6
+
+
+
+
+
+#mintermo 2
+
+and $t5,$t3,$s1
+
+and $s4,$t5,$t6
+
+
+
+#mintermo 4
+
+and $t5,$t4,$s0
+
+and $s5,$t5,$t6
+
+
+
+#mintermo 5
+
+
+and $s6,$t5,$s2
+
+
+
+#resultado
+
+or $t1,$s3,$s4
+
+or $t2,$t1,$s5
+
+or $s7,$t2,$s6
+
+#saida
+
+# s0 -> A
+# s1 -> B
+# s2 -> C
+# t3 -> A negado
+# t4 -> B negado
+# t6 -> C negado
+# s3 -> resultado mintermo 0
+# s4 -> resultado mintermo 2
+# s5 -> resultado mintermo 4
+# s6 -> resultado mintermo 5
+# s7 -> resultado expressao
+
+li $v0, 4
+la $a0, resTitle
+syscall
+
+li $v0, 4
+la $a0, expressaoLabel
+syscall
+
+li $v0, 4
+la $a0, entradasLabel
+syscall
+li $v0, 4
+la $a0, entradaALabel
+syscall
+li $v0, 1
+addi $a0, $s0, 0
+syscall
+li $v0, 4
+la $a0, spaceLabel
+syscall
+li $v0, 4
+la $a0, entradaBLabel
+syscall
+li $v0, 1
+addi $a0, $s1, 0
+syscall
+li $v0, 4
+la $a0, spaceLabel
+syscall
+li $v0, 4
+la $a0, entradaCLabel
+syscall
+li $v0, 1
+addi $a0, $s2, 0
+syscall
+li $v0, 4
+la $a0, spaceLabel
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+
+# resultado: mintermo 0
+li $v0, 4
+la $a0, resMin1
+syscall
+# entrada A negada
+li $v0, 1
+addi $a0, $t3, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada B negada
+li $v0, 1
+addi $a0, $t4, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada C negada
+li $v0, 1
+addi $a0, $t6, 0
+syscall
+# res min
+li $v0, 4
+la $a0, resMin
+syscall
+# res
+li $v0, 1
+addi $a0, $s3, 0
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+# resultado: mintermo 2
+li $v0, 4
+la $a0, resMin2
+syscall
+# entrada A negada
+li $v0, 1
+addi $a0, $t3, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada B
+li $v0, 1
+addi $a0, $s1, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada C negada
+li $v0, 1
+addi $a0, $t6, 0
+syscall
+# res min
+li $v0, 4
+la $a0, resMin
+syscall
+# res
+li $v0, 1
+addi $a0, $s4, 0
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+# resultado: mintermo 4
+li $v0, 4
+la $a0, resMin3
+syscall
+# entrada A
+li $v0, 1
+addi $a0, $s0, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada B negada
+li $v0, 1
+addi $a0, $t4, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada C negada
+li $v0, 1
+addi $a0, $t6, 0
+syscall
+# res min
+li $v0, 4
+la $a0, resMin
+syscall
+# res
+li $v0, 1
+addi $a0, $s5, 0
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+
+# resultado: mintermo 5
+li $v0, 4
+la $a0, resMin4
+syscall
+# entrada A
+li $v0, 1
+addi $a0, $s0, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada B negada
+li $v0, 1
+addi $a0, $t4, 0
+syscall
+# multiplicaca��o
+li $v0, 4
+la $a0, logicMultiSymbol
+syscall
+# entrada C
+li $v0, 1
+addi $a0, $s2, 0
+syscall
+# res min
+li $v0, 4
+la $a0, resMin
+syscall
+# res
+li $v0, 1
+addi $a0, $s6, 0
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+## expressao final
+li $v0, 4
+la $a0, expressaoFinalLabel
+syscall
+li $v0, 1
+addi $a0, $s3, 0
+syscall
+li $v0, 4
+la $a0, logicAddSymbol
+syscall
+li $v0, 1
+addi $a0, $s4, 0
+syscall
+li $v0, 4
+la $a0, logicAddSymbol
+syscall
+li $v0, 1
+addi $a0, $s5, 0
+syscall
+li $v0, 4
+la $a0, logicAddSymbol
+syscall
+li $v0, 1
+addi $a0, $s6, 0
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+## resulstado final
+li $v0, 4
+la $a0, resFinal
+syscall
+li $v0, 1
+addi $a0, $s7, 0
+syscall
+li $v0, 4
+la $a0, breakLineLabel
+syscall
+
+#li $v0, 1
+#move $a0, $s7
+#syscall
