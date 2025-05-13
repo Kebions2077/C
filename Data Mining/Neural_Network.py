@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,11 +12,15 @@ from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.regularizers import l2
+import io
+import requests
 
-# Carregar os dados
-glass = pd.read_csv("C:/dev/glass.csv")
+# Carregar os dados da web (UCI Machine Learning Repository)
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.data"
+col_names = ['Id', 'RI', 'Na', 'Mg', 'Al', 'Si', 'K', 'Ca', 'Ba', 'Fe', 'Type']
+response = requests.get(url)
+glass = pd.read_csv(io.StringIO(response.text), header=None, names=col_names)
 
-glass = glass[glass['Type'] != 6] 
 
 # Pré-processamento
 X = glass.drop('Type', axis=1)
@@ -89,7 +94,7 @@ plt.figure(figsize=(10,8))
 sns.heatmap(
     confusion_matrix(y_test, y_pred_classes),
     annot=True, fmt='d', cmap='Blues',
-    xticklabels=[str(cls) for cls in le.classes_], 
+    xticklabels=[str(cls) for cls in le.classes_],
     yticklabels=[str(cls) for cls in le.classes_]
 )
 plt.title('Confusion Matrix')
