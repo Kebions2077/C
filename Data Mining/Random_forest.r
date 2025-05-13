@@ -1,5 +1,5 @@
 # --------------------------------------------------
-# Random Tree com dados do UCI - Glass Identification
+# Random Tree com dados do UCI - Glass (sem classe 6)
 # --------------------------------------------------
 
 ## 1. Preparação e Download ----
@@ -15,16 +15,23 @@ url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/glass/glass.da
 # Ler os dados (sem cabeçalho)
 glass <- read.csv(url, header = FALSE)
 
-# Adicionar nomes das colunas conforme documentação do UCI
+# Nomear colunas conforme documentação
 colnames(glass) <- c(
   "Id", "RI", "Na", "Mg", "Al", "Si", "K", "Ca", "Ba", "Fe", "Type"
 )
 
-# Remover a coluna de ID (não é útil para modelagem)
+# Remover coluna ID
 glass <- glass %>% select(-Id)
 
-# Converter target em fator
-glass$Type <- as.factor(glass$Type)
+# Excluir registros da classe 6
+glass <- glass %>% filter(Type != 6)
+
+# Converter Type para fator (sem classe 6)
+glass$Type <- factor(glass$Type)
+
+# Verificar níveis após remoção
+cat("Níveis da variável Type após exclusão da classe 6:\n")
+print(levels(glass$Type))
 
 ## 2. Divisão dos Dados ----
 set.seed(123)
@@ -32,11 +39,11 @@ index <- createDataPartition(glass$Type, p = 0.8, list = FALSE)
 trainset <- glass[index, ]
 testset  <- glass[-index, ]
 
-## 3. Treinamento de Árvore de Decisão (Random Tree Simples) ----
+## 3. Treinamento da Árvore de Decisão ----
 model_tree <- rpart(Type ~ ., data = trainset, method = "class")
 
 # Visualização da árvore
-rpart.plot(model_tree, main = "Árvore de Decisão para Classificação de Vidros")
+rpart.plot(model_tree, main = "Árvore de Decisão - Glass (Sem Classe 6)")
 
 ## 4. Avaliação ----
 pred <- predict(model_tree, newdata = testset, type = "class")
