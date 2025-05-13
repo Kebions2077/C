@@ -15,6 +15,8 @@ from tensorflow.keras.regularizers import l2
 # Carregar os dados
 glass = pd.read_csv("C:/dev/glass.csv")
 
+glass = glass[glass['Type'] != 6] 
+
 # Pré-processamento
 X = glass.drop('Type', axis=1)
 y = glass['Type']
